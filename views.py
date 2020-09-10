@@ -9,6 +9,14 @@ from django.contrib.auth.decorators import login_required
 
 from zoom import zoom_api as zoom
 from zoom import secrets
+from zoom.models import Event
+
+# Record a click on the Start Meeting button
+@login_required
+def start(request, meeting_id, encoded_url):
+    event = Event.objects.create(user=request.user, event='ST', meeting_id=meeting_id)
+    event.save()
+    return HttpResponseRedirect(urllib.parse.unquote(encoded_url))
 
 # Show a list of upcoming meetings
 @login_required

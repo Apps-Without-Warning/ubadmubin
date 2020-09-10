@@ -92,7 +92,7 @@
     {% if meeting %}
         <div class="row padded">
             <div class="col-2">
-                <a class="btn btn-primary" id="start_button" href="{{ meeting.start_url }}">Start meeting</a>
+                <a class="btn btn-primary" id="start_button" href="{% url 'start' meeting_id=meeting.id encoded_url=meeting.start_url|urlencode:"" %}">Start meeting</a>
             </div>
             <div class="col-1"></div>
             <div class="col-8">
