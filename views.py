@@ -6,6 +6,7 @@ import urllib
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 
 from zoom import zoom_api as zoom
 from zoom import secrets
@@ -110,6 +111,9 @@ def meeting(request, meeting_id, occurrence_id=None):
             # if it's a past meeting, get attendees (FIXME won't work for recurring meetings)
             if pytz.utc.localize(datetime.strptime(meeting['start_time'], '%Y-%m-%dT%H:%M:%SZ')) + timedelta(minutes=int(meeting['duration'])) < datetime.now(pytz.utc):
                 data['participants'], _ = zoom.get_participants(token, meeting_id)
+
+                # also get users who started this meeting
+                data['starters'] = User.objects.filter(event__meeting_id=meeting_id, event__event='ST')
         except Exception as e:
             data['error_message'] = 'Couldn\'t fetch attendee data: %s' % e
 

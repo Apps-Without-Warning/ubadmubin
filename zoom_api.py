@@ -99,6 +99,7 @@ def get_registrants(token, meeting_id):
 
     regs = list(
             map(lambda r: {
+                    'id': r['id'],
                     'name': ' '.join(combine(r, 'first_name', 'last_name')),
                     'email': r['email'].lower(),
                     'location': ', '.join(combine(r, 'city', 'state', 'country')) or 'Unknown',
