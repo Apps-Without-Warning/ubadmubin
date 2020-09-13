@@ -18,6 +18,17 @@
 {% block toprightnav %}
     {% if meeting %}
         <a id="edit-nav" class="btn btn-warning" href="#">Edit this event</a>
+
+        <div id="update-nav" class="nav-right hidden">
+            <a id="reset-nav" class="btn btn-warning" href="#">Reset</a>
+            <br/><br/>
+            <form id="update-form" class="hidden" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success" name="action" value="update">Update event</button>
+                <br/><br/>
+                <button type="submit" class="btn btn-info" name="action" value="create">Save as new event</button>
+            </form>
+        </div>
     {% endif %}
 {% endblock %}
 
@@ -271,17 +282,6 @@
                     Registration not required
                 </div>
             {% endif %}
-        </div>
-
-        <div id="update-nav" class="nav nav-right hidden">
-            <a id="reset-nav" class="btn btn-warning" href="#">Reset</a>
-            <br/><br/>
-            <form id="update-form" class="hidden" method="POST">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-success" name="action" value="update">Update event</button>
-                <br/><br/>
-                <button type="submit" class="btn btn-info" name="action" value="create">Save as new event</button>
-            </form>
         </div>
     {% endif %}
 
