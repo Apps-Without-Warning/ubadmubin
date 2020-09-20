@@ -188,14 +188,14 @@
         <div class="row padded">
             {% if registrants is not None %}
                 {% if registrants %}
-                    <table class="table">
+                    <table class="table" id="registrants">
                         <thead>
                             <tr>
                                 <th colspan="2">
                                     {% if participants %}
-                                        {{ registrants|length }} registrants, {{ participants|length }} attendees:
+                                        {{ registrants|length }} registrant{{ registrants|length|pluralize }}, {{ participants|length }} attendee{{ participants|length|pluralize }}:
                                     {% else %}
-                                        {{ registrants|length }} registrants sorted by last name:
+                                        {{ registrants|length }} registrant{{ registrants|length|pluralize:"s sorted by last name" }}:
                                     {% endif %}
                                 </th>
                             </tr>
