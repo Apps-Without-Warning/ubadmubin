@@ -256,11 +256,13 @@
                                                 {% for starter in starters %}
                                                     {# check the records of who started this meeting through this app #}
                                                     {% if starter.email == registrant.email or starter.first_name|add:" "|add:starter.last_name == registrant.name %}
-                                                        {# found a match (there can be multiple, which is why I'm not showing the time,
-                                                           even though it's available in participants|lookup:"login@thursdaycontra.com",
-                                                           because if there were multiple hosts the time would all be added together
-                                                           (there's still potentially a way to disambiguate, by not aggregating the time
-                                                            windows and then looking at the event timestamp to associate them)) #}
+                                                        {% comment %}
+                                                            found a match (there can be multiple, which is why I'm not showing the time,
+                                                            even though it's available in participants|lookup:"login@thursdaycontra.com",
+                                                            because if there were multiple hosts the time would all be added together
+                                                            (there's still potentially a way to disambiguate, by not aggregating the time
+                                                             windows and then looking at the event timestamp to associate them)) #}
+                                                         {% endcomment %}
                                                         Host
                                                         {# hide the No #}<style>#absent-{{registrant.id}} { display: none }</style>
                                                         {# we could break out of the loop now, if django supported such a thing... #}
