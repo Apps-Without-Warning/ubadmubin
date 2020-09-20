@@ -12,6 +12,7 @@ class Event(models.Model):
     user = models.ForeignKey(auth_models.User, on_delete=models.CASCADE)
     event = models.CharField(max_length=2, choices=EVENT_TYPES)
     meeting_id = models.BigIntegerField()
+    data = models.TextField(default='', blank=True)
 
     def __str__(self):
         verbs = {'ST': 'started', 'UP': 'edited', 'CR': 'created'}

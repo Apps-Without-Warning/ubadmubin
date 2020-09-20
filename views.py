@@ -67,6 +67,9 @@ def meeting(request, meeting_id, occurrence_id=None):
             if post['action'] == 'update':
                 # edit the current meeting, then show it again
 
+                event = Event.objects.create(user=request.user, event='UP', meeting_id=meeting_id, data=json.dumps(updates))
+                event.save()
+
                 try:
                     _, code = zoom.update_meeting(token, meeting_id, updates)
                     error = ''
@@ -81,6 +84,9 @@ def meeting(request, meeting_id, occurrence_id=None):
 
                 for k, v in updates.items():
                     meeting[k] = v
+
+                event = Event.objects.create(user=request.user, event='CR', meeting_id=meeting_id, data=json.dumps(meeting))
+                event.save()
 
                 try:
                     meeting, code = zoom.create_meeting(token, meeting)
