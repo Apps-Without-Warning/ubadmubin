@@ -147,6 +147,12 @@ function editable() {
         $('#update-nav').show();
     });
 
+    $('#update-form [value="update"]').click(function() {
+        if ($('#registrants').length) {
+            return confirm('Warning! Editing a meeting will send emails to each registrant. Proceed?');
+        }
+    });
+
     $('#reset-nav').click(function() {
         $('.edit').each(function(idx, elem) {
             // remove click handler
