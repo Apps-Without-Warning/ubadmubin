@@ -197,6 +197,8 @@
                                     {% else %}
                                         {{ registrants|length }} registrant{{ registrants|length|pluralize:"s sorted by last name" }}:
                                     {% endif %}
+
+                                    (<a href="mailto:{% for registrant in registrants %}{{ registrant.email }}{% if not forloop.last %},{% endif %}{% endfor %}">email all registrants</a>)
                                 </th>
                             </tr>
                             <tr class="title-row">
