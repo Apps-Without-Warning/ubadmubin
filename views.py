@@ -91,7 +91,9 @@ def meeting(request, meeting_id, occurrence_id=None):
                 try:
                     meeting, code = zoom.create_meeting(token, meeting)
                 except zoom.Error as e:
-                    return HttpResponseRedirect('?response_code=%d' % code) # redirect so that refreshing doesn't POST again
+                    code = e.code
+                    error = urllib.request.quote(json.dumps(e.data))
+                    return HttpResponseRedirect('?response_code=%d&error=%s' % (code, error)) # redirect so that refreshing doesn't POST again
 
                 return redirect('meeting', meeting_id=meeting['id'])
 
