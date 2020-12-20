@@ -63,9 +63,22 @@ def zoom_request(token, path, params={}, method='GET'):
 
 # List upcoming meetings
 def list_meetings(token, user='me', typ='upcoming'):
-    data, code = zoom_request(token, 'users/%s/meetings' % user, params={'type': typ})
-    data['meetings'].sort(key=lambda m: m['start_time'])
-    return data['meetings'], code
+    meetings = []
+    params = {'type': typ, 'page_size': MAX_PAGE_SIZE}
+
+    while True:
+        data, code = zoom_request(token, 'users/%s/meetings' % user, params)
+        if code != 200:
+            break
+
+        meetings += sorted(data['meetings'], key=lambda m: m['start_time'])
+
+        if 'next_page_token' in data and data['next_page_token'] != '':
+            params['next_page_token'] = data['next_page_token']
+        else:
+            break
+
+    return meetings, code
 
 # Get details about a specific meeting
 # Includes start URL but not registrants
