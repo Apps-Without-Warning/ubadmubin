@@ -179,6 +179,32 @@
                             {% if meeting.password %}
                                 (password: <span id="password" class="edit" data-type="text" data-value="{{ meeting.password }}">{{ meeting.password }}</span>)
                             {% endif %}
+                            <details>
+                                <summary>Settings</summary>
+                                <form method="POST">
+                                    {% csrf_token %}
+                                    <table>
+                                        {% for setting in editable_settings %}
+                                            {% if setting.2 == 'boolean' %}
+                                                <tr>
+                                                    <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                                                    <td>
+                                                        <input type="checkbox" id="{{ setting.0 }}" name="{{ setting.0 }}" class="meeting-settings" {% if meeting.settings|lookup:setting.0 %}checked{% endif%} />
+                                                        &nbsp;
+                                                        <label for="{{ setting.0 }}">{{ setting.1 }}</label>
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <tr>
+                                            <td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                                            <td>
+                                                <button type="submit" class="btn btn-sm btn-success" name="action" value="settings">Apply</button>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </form>
+                            </details>
                         </td>
                     </tr>
                 </table>
@@ -367,6 +393,10 @@
 
         #error-details tbody td {
             padding: 2em;
+        }
+
+        input.meeting-settings {
+            vertical-align: 0.05em;
         }
     </style>
 {% endblock %}
