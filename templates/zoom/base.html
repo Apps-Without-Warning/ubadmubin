@@ -39,6 +39,12 @@
                 right: 1em;
                 text-align: right;
             }
+
+            .footer {
+                margin-top: 5em;
+                margin-bottom: 2em;
+                font-size: small;
+            }
         </style>
 
         <title>{% block title %}{% endblock %}</title>
@@ -67,6 +73,10 @@
             {% block content %}{% endblock %}
 
             <div class="row"><br/></div>
+        </div>
+
+        <div class="footer container">
+            Generated in {{ processing_time }}
         </div>
     </body>
 </html>

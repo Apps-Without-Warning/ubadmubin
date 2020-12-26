@@ -12,6 +12,29 @@ from zoom import zoom_api as zoom
 from zoom import secrets
 from zoom.models import Event
 
+# Helper class for a view to return a template to be rendered, along with the data
+class TemplateInvocation(object):
+    def __init__(self, filename, data):
+        self.filename = filename
+        self.data = data
+
+# View decorator that calculates processing time and adds it to the template data, if applicable
+# The wrapped view should return a TemplateInvocation, or some other response that will be passed through
+def processing_time(view):
+    def timed_view(request, *args, **kwargs):
+        start = datetime.now()
+
+        result = view(request, *args, **kwargs)
+
+        if isinstance(result, TemplateInvocation):
+            result.data['processing_time'] = (datetime.now() - start)
+
+            return render(request, result.filename, result.data)
+        else:
+            return result
+
+    return timed_view
+
 # Record a click on the Start Meeting button
 @login_required
 def start(request, meeting_id, encoded_url):
@@ -21,6 +44,7 @@ def start(request, meeting_id, encoded_url):
 
 # Show a list of upcoming meetings
 @login_required
+@processing_time
 def meetings(request):
     if 'crash' in request.GET:
         raise Exception('oh no')
@@ -29,11 +53,12 @@ def meetings(request):
         meetings, _ = zoom.list_meetings(token, typ=request.GET['type'])
     else:
         meetings, _ = zoom.list_meetings(token)
-    return render(request, 'zoom/meetings.html', {'meetings': meetings})
+    return TemplateInvocation('zoom/meetings.html', {'meetings': meetings})
 
 # Show details about a single meeting
 # If method==POST, update meeting details first
 @login_required
+@processing_time
 def meeting(request, meeting_id, occurrence_id=None):
     data = {}
 
@@ -154,5 +179,5 @@ def meeting(request, meeting_id, occurrence_id=None):
         data['response_code'] = int(request.GET['response_code'])
     if 'error' in request.GET:
         data['error'] = zoom.load_json(request.GET['error'])
-    return render(request, 'zoom/meeting.html', data)
+    return TemplateInvocation('zoom/meeting.html', data)
 
