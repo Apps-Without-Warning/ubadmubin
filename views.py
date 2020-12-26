@@ -3,14 +3,16 @@ import pytz
 import json
 import urllib
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 from zoom import zoom_api as zoom
 from zoom import secrets
-from zoom.models import Event
+from zoom.models import Event, Webhook
 
 # Helper class for a view to return a template to be rendered, along with the data
 class TemplateInvocation(object):
@@ -34,6 +36,23 @@ def processing_time(view):
             return result
 
     return timed_view
+
+# Receive a web hook event notification from Zoom
+@csrf_exempt
+@require_POST
+def webhook(request):
+    events = {
+            'meeting.participant_joined_waiting_room': ('JWR', 'participant'),
+            'meeting.registration_created': ('MRC', 'registrant'),
+        }
+
+    if request.headers.get('authorization', '') != secrets.WEBHOOK_VERIFICATION_TOKEN:
+        return HttpResponse('Bad authorization', status=403)
+    else:
+        data = json.loads(request.body)
+        hook = Webhook.objects.create(event=events[data['event']][0], meeting_id=data['payload']['object']['id'], data=data['payload']['object'][events[data['event']][1]])
+        hook.save()
+        return HttpResponse('Webhook received')
 
 # Record a click on the Start Meeting button
 @login_required

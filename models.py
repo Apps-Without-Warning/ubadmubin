@@ -18,3 +18,17 @@ class Event(models.Model):
         verbs = {'ST': 'started', 'UP': 'edited', 'CR': 'created'}
         return '%s (%s) %s %s at %s' % (self.user, ' '.join([self.user.first_name, self.user.last_name]), verbs[self.event], self.meeting_id, self.timestamp.astimezone().strftime('%c %Z'))
 
+class Webhook(models.Model):
+    EVENT_TYPES = [
+            ('JWR', 'Joined Waiting Room'),
+            ('MRC', 'Registration Created'),
+        ]
+
+    timestamp = models.DateTimeField(auto_now_add=True)
+    event = models.CharField(max_length=3, choices=EVENT_TYPES)
+    meeting_id = models.BigIntegerField()
+    data = models.TextField(default='', blank=True)
+
+    def __str__(self):
+        return '[%s] %s(%s): %s' % (self.timestamp.astimezone().strftime('%c %Z'), self.event, self.meeting_id, self.data)
+

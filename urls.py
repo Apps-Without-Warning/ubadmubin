@@ -14,6 +14,9 @@ urlpatterns = [
 
     # start meeting redirect
     path('start/<int:meeting_id>/<str:encoded_url>', views.start, name='start'),
+
+    # webhook event notification
+    path('webhook', views.webhook, name='webhook'),
 ]
 
 
