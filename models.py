@@ -58,13 +58,16 @@ def archive_meeting(meeting_id):
     token = zoom.gen_token()
     try:
         meeting, _ = zoom.get_meeting(token, meeting_id)
-        if meeting['type'] == 2: # non-recurrint meeting
+        if meeting['type'] == 2: # non-recurring meeting
            if  meeting['settings']['approval_type'] == 0: # registration required and auto-approved
                 registrants, _ = zoom.get_registrants(token, meeting_id)
                 participants, _ = zoom.get_participants(token, meeting_id)
 
                 meeting_obj = Meeting.objects.create(meeting_id=meeting_id, title=meeting['topic'], description=meeting['agenda'], time=pytz.utc.localize(datetime.strptime(meeting['start_time'], '%Y-%m-%dT%H:%M:%SZ')), duration=timedelta(minutes=meeting['duration']), registrants=len(registrants), participants=len(participants))
                 meeting_obj.save()
+
+                # purge collected data
+                Webhook.objects.filter(meeting_id=meeting_id).delete()
     except:
         pass
 
