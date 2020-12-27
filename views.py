@@ -42,6 +42,8 @@ def processing_time(view):
 @require_POST
 def webhook(request):
     events = {
+            'meeting.started': ('MS', 'id'),
+            'meeting.ended': ('ME', 'id'),
             'meeting.participant_joined_waiting_room': ('JWR', 'participant'),
             'meeting.registration_created': ('MRC', 'registrant'),
         }
