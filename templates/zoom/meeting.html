@@ -291,7 +291,7 @@
                                                             (there's still potentially a way to disambiguate, by not aggregating the time
                                                              windows and then looking at the event timestamp to associate them)) #}
                                                          {% endcomment %}
-                                                        Host
+                                                        {# show the Host #}<style>#host-{{registrant.id}} { display: inline !important }</style>
                                                         {# hide the No #}<style>#absent-{{registrant.id}} { display: none }</style>
                                                         {# we could break out of the loop now, if django supported such a thing... #}
                                                     {% endif %}
@@ -299,6 +299,7 @@
 
                                                 {# this will show up if we didn't find them as a host #}
                                                 <a id="absent-{{registrant.id}}" href="#asterisk">No*</a>
+                                                <a id="host-{{registrant.id}}" style="display: none">Host</a>
                                             {% endif %}
                                         </td>
                                     {% endif %}
