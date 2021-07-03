@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import pytz
 import json
+import traceback
 
 from django.db import models
 from django.contrib.auth import models as auth_models
@@ -52,7 +53,7 @@ class Meeting(models.Model):
     participants = models.IntegerField()
 
     def __str__(self):
-        return '[%s] %s (%s|%s)' % (self.time.astimezone().strftime('%c %Z'), self.title, self.registrants, self.participants)
+        return '%s [%s] %s (%s|%s)' % (self.meeting_id, self.time.astimezone().strftime('%c %Z'), self.title, self.registrants, self.participants)
 
 def archive_meeting(meeting_id):
     token = zoom.gen_token()
@@ -66,14 +67,21 @@ def archive_meeting(meeting_id):
                 meeting_obj = Meeting.objects.create(meeting_id=meeting_id, title=meeting['topic'], description=meeting['agenda'], time=pytz.utc.localize(datetime.strptime(meeting['start_time'], '%Y-%m-%dT%H:%M:%SZ')), duration=timedelta(minutes=meeting['duration']), registrants=len(registrants), participants=len(participants))
                 meeting_obj.save()
 
+                reg_hooks = Webhook.objects.filter(meeting_id=meeting_id, event='MRC')
+                part_hooks = Webhook.objects.filter(meeting_id=meeting_id, event='JWR')
+                meeting_obj2 = Meeting.objects.create(meeting_id=meeting_id, title=meeting['topic'] + ' (from events)', description=meeting['agenda'], time=pytz.utc.localize(datetime.strptime(meeting['start_time'], '%Y-%m-%dT%H:%M:%SZ')), duration=timedelta(minutes=meeting['duration']), registrants=len(reg_hooks), participants=len(part_hooks))
+                meeting_obj2.save()
+
                 # purge collected data
                 Webhook.objects.filter(meeting_id=meeting_id).delete()
     except:
-        pass
+        # create a "meeting" to record the error
+        meeting_obj = Meeting.objects.create(meeting_id=meeting_id, title='Error cleaning up %s' % meeting_id, description=traceback.format_exc(), time=datetime.now(), duration=timedelta(0), registrants=0, participants=0)
+        meeting_obj.save()
 
 @receiver(post_save, sender=Webhook)
 def on_webhook(sender, instance, created, **kwargs):
     if created:
         if instance.event == 'ME':
-            archive_meeting(instance.meeting_id)
+            archive_meeting(int(instance.meeting_id))
 
