@@ -82,8 +82,11 @@ def list_meetings(token, user='me', typ='upcoming'):
 
 # Get details about a specific meeting
 # Includes start URL but not registrants
-def get_meeting(token, meeting_id):
-    return zoom_request(token, 'meetings/%d' % meeting_id)
+def get_meeting(token, meeting_id, occurrence=None):
+    if occurrence is None:
+        return zoom_request(token, 'meetings/%d' % meeting_id)
+    else:
+        return zoom_request(token, 'meetings/%d' % meeting_id, params={'occurrence_id': occurrence})
 
 # Updates a meeting
 def update_meeting(token, meeting_id, updates):

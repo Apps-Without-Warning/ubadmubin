@@ -88,10 +88,11 @@ def meeting(request, meeting_id, occurrence_id=None):
     editable_settings = [
         ('waiting_room', 'Use waiting room', 'boolean'),
         ('request_permission_to_unmute_participants', 'Request permission to unmute participants', 'boolean'),
+        ('mute_upon_entry', 'Mute participants on entry', 'boolean'),
     ]
 
     try:
-        meeting, _ = zoom.get_meeting(token, meeting_id)
+        meeting, _ = zoom.get_meeting(token, meeting_id, occurrence_id)
     except zoom.Error as e:
         data['response_code'] = e.code
     else:
