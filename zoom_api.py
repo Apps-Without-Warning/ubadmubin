@@ -62,7 +62,7 @@ def zoom_request(token, path, params={}, method='GET'):
     raise Error(rep.status_code, load_json(rep.text))
 
 # List upcoming meetings
-def list_meetings(token, user='me', typ='upcoming'):
+def list_meetings(token, user='me', typ='upcoming', follow_recurring=True):
     meetings = []
     params = {'type': typ, 'page_size': MAX_PAGE_SIZE}
 
@@ -77,6 +77,27 @@ def list_meetings(token, user='me', typ='upcoming'):
             params['next_page_token'] = data['next_page_token']
         else:
             break
+
+    if follow_recurring:
+        # For recurring meetings, there's not enough information in the list to get the
+        # occurrence ID. *Usually*, it's just the start time as UNIX timestamp x1000, but
+        # if the individual recurrence is edited, that breaks down. So we have to make extra
+        # requests to get the occurrence IDs, and we can match them up by start time.
+        cache = {}
+
+        for m in reversed(meetings): # iterate backwards to allow deletion
+            if m['type'] == 8:
+                if m['id'] not in cache:
+                    cache[m['id']], _ = get_meeting(token, m['id'])
+
+                # key assumption: start_time is an acceptable primary key
+                for occ in cache[m['id']]['occurrences']:
+                    if occ['start_time'] == m['start_time']:
+                        m['occurrence_id'] = occ['occurrence_id']
+                        break
+                else:
+                    # if we didn't find it, we can't link to the meeting page. so just leave it out???
+                    meetings.remove(m)
 
     return meetings, code
 
@@ -130,7 +151,7 @@ def get_registrants(token, meeting_id):
 #
 # Returns names, emails, and total minutes in the meeting
 #
-# NB: for a recurring meeting you must pass its UUID insetad of ID, or you'll always get the most recent occurrence
+# NB: for a recurring meeting you must pass its UUID instead of ID, or you'll always get the most recent occurrence
 def get_participants(token, meeting_id):
     # Totals the duration of a set of time intervals,
     # but without double-counting overlaps.

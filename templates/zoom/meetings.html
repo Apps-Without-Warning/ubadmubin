@@ -45,8 +45,7 @@
                 {% for meeting in meetings %}
                     <tr>
                         <td>
-                            {# For recurring meetings, Zoom returns the meeting multiple times in list, with different start times. However, when you retrieve the meeting by ID it returns all the occurrences. To get a specific start time we need to know the "occurrence ID", which is not given in the the meetings list but seems to be the start time as UNIX timestamp x1000. #}
-                            <a href="meeting/{{meeting.id}}{%if meeting.type == 8 %}/{{meeting.start_time|zoom_date|date:'U'}}000{%endif%}">{{ meeting.topic }}</a>
+                            <a href="meeting/{{meeting.id}}{%if meeting.type == 8 %}/{{meeting.occurrence_id}}{%endif%}">{{ meeting.topic }}</a>
                         </td>
                         <td>
                             {{ meeting.start_time|zoom_date|localtime }}
