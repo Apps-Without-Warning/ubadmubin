@@ -106,6 +106,7 @@ def meeting(request, meeting_id, occurrence_id=None):
         meeting, _ = zoom.get_meeting(token, meeting_id, occurrence_id)
     except zoom.Error as e:
         data['response_code'] = e.code
+        data['response_data'] = e.data
     else:
         if request.method == 'POST':
             post = {k: urllib.parse.unquote(v) for k, v in request.POST.items()}
@@ -134,7 +135,8 @@ def meeting(request, meeting_id, occurrence_id=None):
 
                 # use a whitelist of properties that can be set
                 for prop in ('topic', 'password', 'agenda'):
-                    updates[prop] = post[prop]
+                    if prop in post:
+                        updates[prop] = post[prop]
 
                 # start_time is split into three properties
                 updates['start_time'] = '%(start_time-date)sT%(start_time-time)s:00' % post

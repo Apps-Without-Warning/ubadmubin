@@ -17,7 +17,9 @@
 {% endblock %}
 {% block toprightnav %}
     {% if meeting %}
-        <a id="edit-nav" class="btn btn-warning" href="#">Edit this event</a>
+        {% if request.user.is_staff %}
+            <a id="edit-nav" class="btn btn-warning" href="#">Edit this event</a>
+        {% endif %}
 
         <div id="update-nav" class="nav-right hidden">
             <a id="reset-nav" class="btn btn-warning" href="#">Reset</a>
@@ -45,7 +47,7 @@
                                 {% if response_code == 300 %}
                                     <h6 class="text-danger">Rate limited (try again later)</h6>
                                 {% elif response_code == 400 %}
-                                    <h6 class="text-danger">Could not update meeting :(</h6>
+                                    <h6 class="text-danger">Could not find/update meeting: {{ response_data }}</h6>
                                 {% elif response_code == 404 %}
                                     <h6 class="text-danger">Could not find meeting :(</h6>
                                 {% endif %}
@@ -180,7 +182,7 @@
                                 (password: <span id="password" class="edit" data-type="text" data-value="{{ meeting.password }}">{{ meeting.password }}</span>)
                             {% endif %}
                             <details>
-                                <summary>Settings</summary>
+                                <summary><a class="btn btn-info btn-sm text-white">Settings</a></summary>
                                 <form method="POST">
                                     {% csrf_token %}
                                     <table>
@@ -438,7 +440,7 @@
                 window.history.replaceState(null, null, '?' + params.toString());
             {% endif %}
 
-            {% if not meeting.recurrence %}
+            {% if not meeting.recurrence and request.user.is_staff %}
                 editable();
                 $('#edit-nav').show();
             {% endif %}
