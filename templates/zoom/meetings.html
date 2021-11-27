@@ -16,6 +16,7 @@
     {% else %}
         <a class="btn btn-dark" href="?type=scheduled">Show past meetings</a>
     {% endif %}
+    <a class="btn btn-dark" href="{% url 'attendance' %}">See attendance</a>
 {% endblock %}
 
 {% block content %}

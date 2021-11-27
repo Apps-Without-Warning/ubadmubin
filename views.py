@@ -12,7 +12,7 @@ from django.views.decorators.http import require_POST
 
 from zoom import zoom_api as zoom
 from zoom import secrets
-from zoom.models import Event, Webhook
+from zoom.models import Event, Meeting, Webhook
 
 # Helper class for a view to return a template to be rendered, along with the data
 class TemplateInvocation(object):
@@ -43,7 +43,7 @@ def processing_time(view):
 def webhook(request):
     events = {
             'meeting.started': ('MS', 'id'),
-            'meeting.ended': ('ME', 'id'),
+            'meeting.ended': ('ME', 'id'), # FIXME not enough info for recurring meetings
             'meeting.participant_joined_waiting_room': ('JWR', 'participant'),
             'meeting.registration_created': ('MRC', 'registrant'),
         }
@@ -52,7 +52,11 @@ def webhook(request):
         return HttpResponse('Bad authorization', status=403)
     else:
         data = json.loads(request.body)
-        hook = Webhook.objects.create(event=events[data['event']][0], meeting_id=data['payload']['object']['id'], data=data['payload']['object'][events[data['event']][1]])
+        hook = Webhook.objects.create(
+                event=events[data['event']][0],
+                meeting_id=data['payload']['object']['id'],
+                data=data['payload']['object'][events[data['event']][1]],
+                raw=request.body.decode())
         hook.save()
         return HttpResponse('Webhook received')
 
@@ -62,6 +66,13 @@ def start(request, meeting_id, encoded_url):
     event = Event.objects.create(user=request.user, event='ST', meeting_id=meeting_id)
     event.save()
     return HttpResponseRedirect(urllib.parse.unquote(encoded_url))
+
+# Historical attendance records
+@login_required
+@processing_time
+def attendance(request):
+    meetings = Meeting.objects.filter(title__endswith='(from events)').order_by('-time')
+    return TemplateInvocation('zoom/attendance.html', {'meetings': meetings})
 
 # Show a list of upcoming meetings
 @login_required

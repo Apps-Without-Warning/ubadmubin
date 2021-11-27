@@ -1,0 +1,73 @@
+{% extends "zoom/base.html" %}
+{% load tz %}
+{% load zoom %}
+
+{% block title %}Attendance Records{% endblock %}
+
+{% block header %}
+    <div class="row padded">
+        <h1>Attendance</h1>
+    </div>
+{% endblock %}
+
+{% block topleftnav %}
+    <a class="btn btn-dark" href="{% url 'meetings' %}">Back to meetings list</a>
+{% endblock %}
+
+{% block content %}
+    {% if error_message %}
+        <div class="row">
+            <div class="col-9">
+                <div class="alert alert-danger" role="alert">
+                    {{ error_message }}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <p>
+        <b>Caution!</b> This data is automatically tabulated from Zoom webhooks. It should definitely not be treated as exact. Also, sometimes the "meeting ended" notification arrives several times so you may see some events listed extra times with a tiny number of attendees (because the data was deleted after counting the attendees once); I'm working on cleaning this up.
+    </p>
+    <p>
+        Full disclosure: In order to tabulate this data and avoid double-counting, whatever Zoom provides (a numerical user ID, the displayed name, sometimes an email address) is recorded on my server during the meeting. As mentioned above it is all deleted once the meeting ends, so these counts are all that is retained.
+    </p>
+
+    <div class="row padded">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th colspan="4">
+                        {{ meetings|length }} events, most recent first:
+                    </th>
+                </tr>
+                <tr>
+                    <th>Date</th>
+                    <th>Title</th>
+                    <th><a title="* This is measured as the number of unique users who join the waiting room during the meeting.">Attendees*</a></th>
+                    <th><a title="** This is usually zero, unless the meeting required pre-registration.">Registrants**</a></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for meeting in meetings %}
+                    <tr>
+                        <td> {{ meeting.time|date }} </td>
+                        <td> {{ meeting.title|slice:":-14" }} </td>
+                        <td> {{ meeting.participants }} </td>
+                        <td> {{ meeting.registrants }} </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if request.GET.debug %}
+        <textarea rows=100 cols=100>{{ meetings|pprint }}</textarea>
+    {% endif %}
+{% endblock %}
+
+{% block script %}
+    <style>
+        .padded { padding-top: 2em; }
+    </style>
+{% endblock %}
+
